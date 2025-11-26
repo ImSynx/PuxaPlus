@@ -1,0 +1,18 @@
+{% extends "main_layout.html" %}
+
+{% block title %}Desafios de treino • Puxa+{% endblock %}
+
+{% block page_content %}
+  <div class="space-y-8">
+    <h1 class="text-4xl font-bold text-center">Desafios Semanais</h1>
+    <div class="max-w-2xl mx-auto space-y-4">
+      {% for item in [1, 2, 3] %}
+        <label class="flex items-center gap-4 p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer">
+          <input type="radio" name="desafio" class="w-5 h-5 border-gray-300" />
+          <span class="text-lg">Desafio {{ item }}</span>
+        </label>
+      {% endfor %}
+    </div>
+  </div>
+{% endblock %}
+

@@ -1,0 +1,41 @@
+{% extends "main_layout.html" %}
+
+{% block title %}Progresso de treino • Puxa+{% endblock %}
+
+{% block page_content %}
+  <div class="space-y-8">
+    <h1 class="text-4xl font-bold text-center">Progresso</h1>
+    <div class="bg-white border border-gray-200 rounded-lg p-8 flex justify-center">
+      <svg width="{{ width }}" height="{{ height }}" class="border-b border-l border-gray-300">
+        <line
+          x1="{{ padding }}"
+          y1="{{ padding }}"
+          x2="{{ padding }}"
+          y2="{{ height - padding }}"
+          stroke="black"
+          stroke-width="2"
+        ></line>
+        <line
+          x1="{{ padding }}"
+          y1="{{ height - padding }}"
+          x2="{{ width - padding }}"
+          y2="{{ height - padding }}"
+          stroke="black"
+          stroke-width="2"
+        ></line>
+        <path
+          d="{{ path_data }}"
+          fill="none"
+          stroke="black"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        ></path>
+        {% for point in scaled_points %}
+          <circle cx="{{ point.x }}" cy="{{ point.y }}" r="4" fill="black"></circle>
+        {% endfor %}
+      </svg>
+    </div>
+  </div>
+{% endblock %}
+

@@ -1,0 +1,35 @@
+{% set current_path = request.path %}
+<div class="w-64 bg-black min-h-screen text-white flex flex-col">
+  <div class="p-6">
+    <a href="{{ url_for('dashboard') }}" class="text-2xl font-bold">
+      {{ nav_section_name }}
+    </a>
+  </div>
+  <nav class="flex-1 px-6 space-y-2">
+    <a
+      href="{{ url_for('dieta') }}"
+      class="block py-3 px-4 rounded transition-colors {{ 'bg-gray-800' if is_nav_active('/dieta') else 'hover:bg-gray-800' }}"
+    >
+      Dieta
+    </a>
+    <a
+      href="{{ url_for('treino') }}"
+      class="block py-3 px-4 rounded transition-colors {{ 'bg-gray-800' if is_nav_active('/treino') else 'hover:bg-gray-800' }}"
+    >
+      Treino
+    </a>
+    <a
+      href="{{ url_for('feed') }}"
+      class="block py-3 px-4 rounded transition-colors {{ 'bg-gray-800' if is_nav_active('/feed') else 'hover:bg-gray-800' }}"
+    >
+      Feed
+    </a>
+    <a
+      href="{{ url_for('perfil') }}"
+      class="block py-3 px-4 rounded transition-colors {{ 'bg-gray-800' if is_nav_active('/perfil') else 'hover:bg-gray-800' }}"
+    >
+      Perfil
+    </a>
+  </nav>
+</div>
+

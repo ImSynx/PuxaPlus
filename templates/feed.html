@@ -1,0 +1,55 @@
+{% extends "main_layout.html" %}
+
+{% block title %}Feed • Puxa+{% endblock %}
+
+{% block page_content %}
+  <div class="max-w-2xl mx-auto space-y-8">
+    <div class="text-center">
+      <h1 class="text-4xl font-bold mb-8">A seguir</h1>
+
+      <div class="bg-white border border-gray-200 rounded-lg p-6 space-y-4 mb-8">
+        <div class="flex items-center gap-3">
+          <div class="w-12 h-12 rounded-full border-2 border-gray-300 flex items-center justify-center">
+            <div class="w-8 h-8 rounded-full bg-gray-200"></div>
+          </div>
+          <span class="font-semibold">nome</span>
+        </div>
+        <div class="w-full h-64 bg-gray-100 border border-gray-200 rounded-lg flex items-center justify-center">
+          <span class="text-gray-400">Conteúdo da publicação</span>
+        </div>
+        <div class="flex items-center gap-4">
+          <button class="hover:text-red-500 transition-colors" aria-label="Gostar">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"></path>
+            </svg>
+          </button>
+          <button class="hover:text-blue-500 transition-colors" aria-label="Comentar">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 11.5a8.38 8.38 0 0 1-9 8.5 8.38 8.38 0 0 1-9-8.5 8.38 8.38 0 0 1 9-8.5 8.38 8.38 0 0 1 9 8.5z"></path>
+              <polyline points="21 11.5 16 16.5 11 11.5"></polyline>
+            </svg>
+          </button>
+          <button class="hover:text-green-500 transition-colors" aria-label="Partilhar">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="18" cy="5" r="3"></circle>
+              <circle cx="6" cy="12" r="3"></circle>
+              <circle cx="18" cy="19" r="3"></circle>
+              <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+              <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="text-center py-12">
+      <a
+        href="#"
+        class="inline-block bg-black text-white px-8 py-4 rounded-lg hover:bg-gray-800 transition-colors font-semibold text-lg"
+      >
+        Publicar o próprio conteúdo
+      </a>
+    </div>
+  </div>
+{% endblock %}
+
