@@ -1,12 +1,11 @@
-# Puxa+ - Flask
+# Puxa+
 
-Aplicação em Flask para a plataforma Puxa+, mantendo as páginas estáticas que existiam na versão em Next.js (login, registo, dashboard, dieta, treino, feed, etc.).
+Aplicação em Flask para a plataforma Puxa+
 
 ## Tecnologias
 
 - Python 3.11+
 - Flask 3
-- Tailwind via CDN
 
 ## Como executar
 
