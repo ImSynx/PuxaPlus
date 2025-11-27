@@ -5,7 +5,7 @@
 {% block page_content %}
   <div class="space-y-8">
     <div>
-      <h1 class="text-4xl font-bold mb-2">Bom dia, "Username"</h1>
+      <h1 class="text-4xl font-bold mb-2">Bom dia, {{ user.username if user else 'Utilizador' }}</h1>
       <p class="text-gray-600">Pronto para puxar hoje?</p>
     </div>
 
