@@ -25,6 +25,23 @@
       Feed
     </a>
     <a
+      href="{{ url_for('desafios') }}"
+      class="block py-3 px-4 rounded transition-colors {{ 'bg-gray-800' if is_nav_active('/desafios') else 'hover:bg-gray-800' }}"
+    >
+      Desafios
+    </a>
+    <a
+      href="{{ url_for('notificacoes') }}"
+      class="block py-3 px-4 rounded transition-colors {{ 'bg-gray-800' if is_nav_active('/notificacoes') else 'hover:bg-gray-800' }} flex items-center justify-between"
+    >
+      <span>Notificações</span>
+      {% if unread_notifications_count > 0 %}
+        <span class="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">
+          {{ unread_notifications_count }}
+        </span>
+      {% endif %}
+    </a>
+    <a
       href="{{ url_for('perfil') }}"
       class="block py-3 px-4 rounded transition-colors {{ 'bg-gray-800' if is_nav_active('/perfil') else 'hover:bg-gray-800' }}"
     >

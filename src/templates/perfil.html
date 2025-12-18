@@ -5,23 +5,46 @@
 {% block page_content %}
   <div class="space-y-8">
     <div class="flex items-start gap-8">
-      <div class="w-32 h-32 rounded-lg bg-purple-100 flex items-center justify-center">
-        <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-purple-600">
-          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-          <circle cx="12" cy="7" r="4" />
-        </svg>
+      <div class="relative">
+        <div class="w-32 h-32 rounded-lg bg-purple-100 flex items-center justify-center overflow-hidden">
+          {% set profile_pic_url = get_profile_picture_url(user) %}
+          {% if profile_pic_url %}
+            <img src="{{ profile_pic_url }}" alt="Foto de perfil" class="w-full h-full object-cover">
+          {% else %}
+            <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-purple-600">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+              <circle cx="12" cy="7" r="4" />
+            </svg>
+          {% endif %}
+        </div>
+        <!-- Botão para alterar foto -->
+        <button
+          onclick="openPhotoModal()"
+          class="mt-3 w-full bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg transition-colors text-sm font-semibold"
+        >
+          Alterar foto
+        </button>
       </div>
       <div class="flex-1 space-y-2">
         <h1 class="text-3xl font-bold">{{ user.username if user else 'Username' }}</h1>
-        <p class="text-gray-600">
-          <strong>Bio:</strong> {{ user.bio if user and user.bio else 'Descrição do perfil' }}
-        </p>
-        <p class="text-gray-600">
-          <strong>Points:</strong> {{ user.points if user else 0 }}
-        </p>
-        <p class="text-gray-600">
-          <strong>Email:</strong> {{ user.email if user else 'N/A' }}
-        </p>
+        <div class="space-y-2">
+          <div>
+            <strong class="text-gray-700">Bio:</strong>
+            <p class="text-gray-600 inline ml-2">{{ user.bio if user and user.bio else 'Sem descrição' }}</p>
+            <button
+              onclick="openBioModal()"
+              class="ml-2 text-blue-600 hover:text-blue-800 text-sm font-semibold"
+            >
+              Editar
+            </button>
+          </div>
+          <p class="text-gray-600">
+            <strong>Points:</strong> {{ user.points if user else 0 }}
+          </p>
+          <p class="text-gray-600">
+            <strong>Email:</strong> {{ user.email if user else 'N/A' }}
+          </p>
+        </div>
       </div>
       <div class="text-right">
         <p class="text-2xl font-bold">Level: {{ user.level if user else 1 }}</p>
@@ -45,5 +68,149 @@
       </div>
     </div>
   </div>
-{% endblock %}
 
+  <!-- Modal para Editar Bio -->
+  <div id="bioModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-2xl font-bold">Editar Bio</h2>
+        <button onclick="closeBioModal()" class="text-gray-500 hover:text-gray-700">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+      
+      <form method="POST" action="{{ url_for('perfil') }}" class="space-y-4">
+        <input type="hidden" name="update_bio" value="1">
+        <div>
+          <label class="block text-sm font-semibold mb-2">Bio</label>
+          <textarea
+            name="bio"
+            rows="4"
+            placeholder="Escreva uma descrição sobre si..."
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black resize-none"
+          >{{ user.bio if user and user.bio else '' }}</textarea>
+        </div>
+        
+        <div class="flex gap-3">
+          <button
+            type="button"
+            onclick="closeBioModal()"
+            class="flex-1 bg-gray-200 text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-300 transition-colors font-semibold"
+          >
+            Cancelar
+          </button>
+          <button
+            type="submit"
+            class="flex-1 bg-black text-white px-4 py-2 rounded-lg hover:bg-gray-800 transition-colors font-semibold"
+          >
+            Guardar
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal para Alterar Foto -->
+  <div id="photoModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-2xl font-bold">Alterar Foto de Perfil</h2>
+        <button onclick="closePhotoModal()" class="text-gray-500 hover:text-gray-700">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+      
+      <form method="POST" action="{{ url_for('perfil') }}" enctype="multipart/form-data" class="space-y-4">
+        <div>
+          <label class="block text-sm font-semibold mb-2">Selecionar Imagem</label>
+          <input
+            type="file"
+            name="profile_picture"
+            accept="image/png,image/jpeg,image/jpg,image/gif,image/webp"
+            required
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
+            onchange="previewImage(this)"
+          />
+          <p class="text-xs text-gray-500 mt-1">Formatos permitidos: PNG, JPG, JPEG, GIF, WEBP (máx. 5MB)</p>
+        </div>
+        
+        <div id="imagePreview" class="hidden">
+          <label class="block text-sm font-semibold mb-2">Pré-visualização</label>
+          <img id="previewImg" src="" alt="Preview" class="w-32 h-32 rounded-lg object-cover border border-gray-300">
+        </div>
+        
+        <div class="flex gap-3">
+          <button
+            type="button"
+            onclick="closePhotoModal()"
+            class="flex-1 bg-gray-200 text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-300 transition-colors font-semibold"
+          >
+            Cancelar
+          </button>
+          <button
+            type="submit"
+            class="flex-1 bg-black text-white px-4 py-2 rounded-lg hover:bg-gray-800 transition-colors font-semibold"
+          >
+            Guardar Foto
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    function openBioModal() {
+      document.getElementById('bioModal').classList.remove('hidden');
+    }
+
+    function closeBioModal() {
+      document.getElementById('bioModal').classList.add('hidden');
+    }
+
+    function openPhotoModal() {
+      document.getElementById('photoModal').classList.remove('hidden');
+    }
+
+    function closePhotoModal() {
+      document.getElementById('photoModal').classList.add('hidden');
+      document.getElementById('imagePreview').classList.add('hidden');
+      document.querySelector('input[name="profile_picture"]').value = '';
+    }
+
+    function previewImage(input) {
+      const preview = document.getElementById('imagePreview');
+      const previewImg = document.getElementById('previewImg');
+      
+      if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        
+        reader.onload = function(e) {
+          previewImg.src = e.target.result;
+          preview.classList.remove('hidden');
+        }
+        
+        reader.readAsDataURL(input.files[0]);
+      } else {
+        preview.classList.add('hidden');
+      }
+    }
+
+    // Fechar modais ao clicar fora
+    window.onclick = function(event) {
+      const bioModal = document.getElementById('bioModal');
+      const photoModal = document.getElementById('photoModal');
+      if (event.target == bioModal) {
+        closeBioModal();
+      }
+      if (event.target == photoModal) {
+        closePhotoModal();
+      }
+    }
+  </script>
+{% endblock %}

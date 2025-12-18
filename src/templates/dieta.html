@@ -4,22 +4,267 @@
 
 {% block page_content %}
   <div class="space-y-8">
-    <h1 class="text-4xl font-bold text-center">Plano Atual da Dieta</h1>
-    <div class="flex items-center justify-center min-h-[50vh]">
-      <div class="text-center">
-        <p class="text-gray-600 mb-8">Conteúdo do plano de dieta</p>
-        <a href="{{ url_for('dieta_desafios') }}" class="inline-flex bg-gray-100 hover:bg-gray-200 p-3 rounded-full transition-colors" aria-label="Ver desafios">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <polyline points="9 18 15 12 9 6"></polyline>
-          </svg>
-        </a>
-      </div>
+    <div class="flex items-center justify-between">
+      <h1 class="text-4xl font-bold">Plano de Dieta</h1>
+      <button
+        onclick="openAddMealModal()"
+        class="bg-black text-white px-6 py-3 rounded-lg hover:bg-gray-800 transition-colors font-semibold"
+      >
+        + Adicionar Refeição
+      </button>
     </div>
-    <div class="flex justify-center gap-2">
-      <div class="w-3 h-3 bg-black rounded-full"></div>
-      <div class="w-3 h-3 border-2 border-black rounded-full"></div>
-      <div class="w-3 h-3 border-2 border-black rounded-full"></div>
+
+    <!-- Plano Semanal -->
+    <div class="grid grid-cols-1 lg:grid-cols-7 gap-4">
+      {% for day in days_of_week %}
+        <div class="bg-white border border-gray-200 rounded-lg p-4">
+          <h3 class="font-bold text-lg mb-4 text-center">{{ day_names_pt[day] }}</h3>
+          
+          <div class="space-y-3">
+            {% for meal_type_key, meal_type_name in meal_types_pt.items() %}
+              {% set day_meals = meals_by_day[day] | selectattr('meal_type', 'equalto', meal_type_key) | list %}
+              {% if day_meals %}
+                <div class="mb-4">
+                  <h4 class="text-sm font-semibold text-gray-600 mb-2">{{ meal_type_name }}</h4>
+                  {% for meal in day_meals %}
+                    <div class="bg-gray-50 rounded-lg p-3 mb-2 border border-gray-200">
+                      <div class="flex items-start justify-between gap-2">
+                        <div class="flex-1">
+                          <p class="font-semibold text-sm">{{ meal.meal_name }}</p>
+                          {% if meal.description %}
+                            <p class="text-xs text-gray-600 mt-1">{{ meal.description }}</p>
+                          {% endif %}
+                          {% if meal.calories %}
+                            <p class="text-xs text-gray-500 mt-1">{{ meal.calories }} kcal</p>
+                          {% endif %}
+                        </div>
+                        <div class="flex gap-1">
+                          <button
+                            data-meal-id="{{ meal.id }}"
+                            data-meal-name="{{ meal.meal_name }}"
+                            data-meal-description="{{ meal.description or '' }}"
+                            data-meal-calories="{{ meal.calories or '' }}"
+                            onclick="openEditMealModalFromButton(this)"
+                            class="text-blue-600 hover:text-blue-800 text-xs"
+                            title="Editar"
+                          >
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                            </svg>
+                          </button>
+                          <form method="POST" action="{{ url_for('delete_meal', meal_id=meal.id) }}" class="inline" onsubmit="return confirm('Tem certeza que deseja eliminar esta refeição?');">
+                            <button
+                              type="submit"
+                              class="text-red-600 hover:text-red-800 text-xs"
+                              title="Eliminar"
+                            >
+                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="3 6 5 6 21 6"></polyline>
+                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                              </svg>
+                            </button>
+                          </form>
+                        </div>
+                      </div>
+                    </div>
+                  {% endfor %}
+                </div>
+              {% endif %}
+            {% endfor %}
+          </div>
+        </div>
+      {% endfor %}
     </div>
   </div>
-{% endblock %}
 
+  <!-- Modal para Adicionar Refeição -->
+  <div id="addMealModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-2xl font-bold">Adicionar Refeição</h2>
+        <button onclick="closeAddMealModal()" class="text-gray-500 hover:text-gray-700">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+      
+      <form method="POST" action="{{ url_for('dieta') }}" class="space-y-4">
+        <div>
+          <label class="block text-sm font-semibold mb-2">Dia da Semana</label>
+          <select name="day_of_week" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black">
+            {% for day in days_of_week %}
+              <option value="{{ day }}">{{ day_names_pt[day] }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        
+        <div>
+          <label class="block text-sm font-semibold mb-2">Tipo de Refeição</label>
+          <select name="meal_type" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black">
+            {% for meal_type_key, meal_type_name in meal_types_pt.items() %}
+              <option value="{{ meal_type_key }}">{{ meal_type_name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        
+        <div>
+          <label class="block text-sm font-semibold mb-2">Nome da Refeição *</label>
+          <input
+            type="text"
+            name="meal_name"
+            required
+            placeholder="Ex: Peito de frango grelhado"
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
+          />
+        </div>
+        
+        <div>
+          <label class="block text-sm font-semibold mb-2">Descrição</label>
+          <textarea
+            name="description"
+            rows="3"
+            placeholder="Ingredientes, preparação, etc."
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black resize-none"
+          ></textarea>
+        </div>
+        
+        <div>
+          <label class="block text-sm font-semibold mb-2">Calorias (opcional)</label>
+          <input
+            type="number"
+            name="calories"
+            min="0"
+            placeholder="Ex: 350"
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
+          />
+        </div>
+        
+        <div class="flex gap-3">
+          <button
+            type="button"
+            onclick="closeAddMealModal()"
+            class="flex-1 bg-gray-200 text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-300 transition-colors font-semibold"
+          >
+            Cancelar
+          </button>
+          <button
+            type="submit"
+            class="flex-1 bg-black text-white px-4 py-2 rounded-lg hover:bg-gray-800 transition-colors font-semibold"
+          >
+            Adicionar
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal para Editar Refeição -->
+  <div id="editMealModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-2xl font-bold">Editar Refeição</h2>
+        <button onclick="closeEditMealModal()" class="text-gray-500 hover:text-gray-700">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+      
+      <form id="editMealForm" method="POST" action="" class="space-y-4">
+        <div>
+          <label class="block text-sm font-semibold mb-2">Nome da Refeição *</label>
+          <input
+            type="text"
+            id="edit_meal_name"
+            name="meal_name"
+            required
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
+          />
+        </div>
+        
+        <div>
+          <label class="block text-sm font-semibold mb-2">Descrição</label>
+          <textarea
+            id="edit_description"
+            name="description"
+            rows="3"
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black resize-none"
+          ></textarea>
+        </div>
+        
+        <div>
+          <label class="block text-sm font-semibold mb-2">Calorias (opcional)</label>
+          <input
+            type="number"
+            id="edit_calories"
+            name="calories"
+            min="0"
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
+          />
+        </div>
+        
+        <div class="flex gap-3">
+          <button
+            type="button"
+            onclick="closeEditMealModal()"
+            class="flex-1 bg-gray-200 text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-300 transition-colors font-semibold"
+          >
+            Cancelar
+          </button>
+          <button
+            type="submit"
+            class="flex-1 bg-black text-white px-4 py-2 rounded-lg hover:bg-gray-800 transition-colors font-semibold"
+          >
+            Guardar
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    function openAddMealModal() {
+      document.getElementById('addMealModal').classList.remove('hidden');
+    }
+
+    function closeAddMealModal() {
+      document.getElementById('addMealModal').classList.add('hidden');
+    }
+
+    function openEditMealModal(mealId, mealName, description, calories, dayOfWeek, mealType) {
+      document.getElementById('edit_meal_name').value = mealName;
+      document.getElementById('edit_description').value = description || '';
+      document.getElementById('edit_calories').value = calories || '';
+      document.getElementById('editMealForm').action = '{{ url_for("edit_meal", meal_id=0) }}'.replace('0', mealId);
+      document.getElementById('editMealModal').classList.remove('hidden');
+    }
+
+    function openEditMealModalFromButton(button) {
+      const mealId = button.getAttribute('data-meal-id');
+      const mealName = button.getAttribute('data-meal-name');
+      const description = button.getAttribute('data-meal-description');
+      const calories = button.getAttribute('data-meal-calories');
+      openEditMealModal(mealId, mealName, description, calories, '', '');
+    }
+
+    function closeEditMealModal() {
+      document.getElementById('editMealModal').classList.add('hidden');
+    }
+
+    // Fechar modais ao clicar fora
+    window.onclick = function(event) {
+      const addModal = document.getElementById('addMealModal');
+      const editModal = document.getElementById('editMealModal');
+      if (event.target == addModal) {
+        closeAddMealModal();
+      }
+      if (event.target == editModal) {
+        closeEditMealModal();
+      }
+    }
+  </script>
+{% endblock %}

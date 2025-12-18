@@ -12,11 +12,22 @@
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
       <div class="bg-white border border-gray-200 rounded-lg p-6">
         <h2 class="text-xl font-semibold mb-4">
-          Tens 3 desafios por completar
+          {% set remaining = total_challenges - completed_challenges %}
+          {% if remaining > 0 %}
+            Tens {{ remaining }} desafio{{ 's' if remaining > 1 else '' }} por completar
+          {% else %}
+            Parabéns! Completaste todos os desafios!
+          {% endif %}
         </h2>
-        <div class="w-full bg-gray-200 rounded-full h-2">
-          <div class="bg-blue-500 h-2 rounded-full" style="width: 10%;"></div>
+        <div class="w-full bg-gray-200 rounded-full h-2 mb-2">
+          <div class="bg-blue-500 h-2 rounded-full transition-all duration-300" style="width: {{ progress_percentage }}%;"></div>
         </div>
+        <p class="text-sm text-gray-600">
+          {{ completed_challenges }} de {{ total_challenges }} desafios completados ({{ progress_percentage }}%)
+        </p>
+        <a href="{{ url_for('desafios') }}" class="text-blue-600 hover:text-blue-800 text-sm font-semibold mt-2 inline-block">
+          Ver todos os desafios →
+        </a>
       </div>
 
       <div class="bg-white border border-gray-200 rounded-lg p-6">
@@ -32,15 +43,50 @@
         Treinos agendados para hoje
       </h2>
       <div class="space-y-4">
-        <div class="flex items-center justify-between">
-          <div>
-            <h3 class="text-xl font-medium">Treino de pernas</h3>
-            <p class="text-gray-600">Amanhã às 14h</p>
+        {% if today_workouts %}
+          {% for workout in today_workouts %}
+            <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200">
+              <div class="flex-1">
+                <h3 class="text-xl font-medium">{{ workout.workout_name }}</h3>
+                <p class="text-gray-600 text-sm">
+                  {% if workout.workout_type == 'cardio' %}
+                    Cardio
+                  {% elif workout.workout_type == 'strength' %}
+                    Força
+                  {% elif workout.workout_type == 'flexibility' %}
+                    Flexibilidade
+                  {% elif workout.workout_type == 'hiit' %}
+                    HIIT
+                  {% elif workout.workout_type == 'yoga' %}
+                    Yoga
+                  {% elif workout.workout_type == 'pilates' %}
+                    Pilates
+                  {% elif workout.workout_type == 'crossfit' %}
+                    CrossFit
+                  {% else %}
+                    Outro
+                  {% endif %}
+                  {% if workout.duration %}
+                    • {{ workout.duration }} min
+                  {% endif %}
+                </p>
+                {% if workout.description %}
+                  <p class="text-gray-500 text-xs mt-1">{{ workout.description }}</p>
+                {% endif %}
+              </div>
+              <a href="{{ url_for('treino') }}" class="bg-gray-100 hover:bg-gray-200 px-6 py-2 rounded-lg transition-colors text-sm font-semibold">
+                Ver plano
+              </a>
+            </div>
+          {% endfor %}
+        {% else %}
+          <div class="text-center py-8">
+            <p class="text-gray-500 mb-4">Não há treinos agendados para hoje</p>
+            <a href="{{ url_for('treino') }}" class="text-blue-600 hover:text-blue-800 font-semibold">
+              Adicionar treino →
+            </a>
           </div>
-          <button class="bg-gray-100 hover:bg-gray-200 px-6 py-2 rounded-lg transition-colors">
-            Ver plano de treino
-          </button>
-        </div>
+        {% endif %}
       </div>
     </div>
   </div>
